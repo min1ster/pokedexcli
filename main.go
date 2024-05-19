@@ -1,22 +1,22 @@
 package main
 
 import (
-	"fmt"
 	"bufio"
+	"fmt"
 	"os"
 )
 
 type cliCommand struct {
-	name string
+	name        string
 	description string
-	callback func() error
+	callback    func() error
 }
 
 func getCommands() map[string]cliCommand {
 	commands := make(map[string]cliCommand)
 
 	helpCommand := cliCommand{
-		name: "help",
+		name:        "help",
 		description: "Displays a help message",
 		callback: func() error {
 			fmt.Print("\nWelcome to Pokedex!\n\n")
@@ -29,7 +29,7 @@ func getCommands() map[string]cliCommand {
 	}
 
 	exitCommand := cliCommand{
-		name: "exit",
+		name:        "exit",
 		description: "Exit the Pokedex",
 		callback: func() error {
 			os.Exit(0)
@@ -54,8 +54,8 @@ func main() {
 			if !ok {
 				fmt.Println("Unknown command")
 				continue
- 			}
+			}
 			command.callback()
-		}		
+		}
 	}
 }
