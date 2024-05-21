@@ -2,28 +2,15 @@ package main
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
-	"io"
-	"log"
-	"net/http"
 	"os"
+	"github.com/min1ster/pokedexcli/locations"
 )
 
 type cliCommand struct {
 	name        string
 	description string
 	callback    func() error
-}
-
-type locationsPayload struct {
-	Count    int     `json:"count"`
-	Next     string  `json:"next"`
-	Previous *string `json:"previous"`
-	Results  []struct {
-		Name string `json:"name"`
-		Url  string `json:"url"`
-	} `json:"results"`
 }
 
 func getCommands() map[string]cliCommand {
@@ -57,7 +44,7 @@ func getCommands() map[string]cliCommand {
 		description: "Displays the names of 20 location areas in the Pokemon world. Each call displays the next 20 locations.",
 		callback: func() error {
 			currentPage += 1
-			err := getLocations(currentPage)
+			err := locations.GetLocations(currentPage)
 			return err
 		},
 	}
@@ -69,7 +56,7 @@ func getCommands() map[string]cliCommand {
 			if currentPage > -1 {
 				currentPage -= 1
 			}
-			err := getLocations(currentPage)
+			err := locations.GetLocations(currentPage)
 			return err
 		},
 	}
@@ -82,33 +69,7 @@ func getCommands() map[string]cliCommand {
 	return commands
 }
 
-func getLocations(page int) error {
-	offset := 20 * page
-	endpoint := fmt.Sprintf("https://pokeapi.co/api/v2/location-area?offset=%d&limit=20", offset)
-	res, err := http.Get(endpoint)
 
-	if err != nil {
-		log.Fatal(err)
-		return err
-	}
-
-	defer res.Body.Close()
-
-	if res.StatusCode != http.StatusOK {
-		log.Fatalf("Response failed with status code: %d", res.StatusCode)
-	}
-
-	bodyBytes, err := io.ReadAll(res.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-	locations := locationsPayload{}
-	json.Unmarshal(bodyBytes, &locations)
-	for _, location := range locations.Results {
-		fmt.Println(location.Name)
-	}
-	return nil
-}
 
 func main() {
 	commands := getCommands()
