@@ -3,6 +3,9 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
+	"log"
+	"net/http"
 	"os"
 )
 
@@ -11,6 +14,18 @@ type cliCommand struct {
 	description string
 	callback    func() error
 }
+
+// type locationsPayload struct {
+// 	count int
+// 	next *string
+// 	previous *string
+// 	results []location
+// }
+
+// type location struct {
+// 	name string
+// 	url string
+// }
 
 func getCommands() map[string]cliCommand {
 	commands := make(map[string]cliCommand)
@@ -37,10 +52,43 @@ func getCommands() map[string]cliCommand {
 		},
 	}
 
+	mapCommand := cliCommand{
+		name:        "map",
+		description: "Displays the names of 20 location areas in the Pokemon world. Each call displays the next 20 locations.",
+		callback: func() error {
+			currentPage := 0
+			err := getLocations(currentPage)
+			currentPage += 1
+			return err
+		},
+	}
+
 	commands["help"] = helpCommand
 	commands["exit"] = exitCommand
+	commands["map"] = mapCommand
 
 	return commands
+}
+
+func getLocations(page int) error {
+	offset := 20 * page
+	endpoint := fmt.Sprintf("https://pokeapi.co/api/v2/location-area?offset=%d&limit=20", offset)
+	res, err := http.Get(endpoint)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+	body, err := io.ReadAll(res.Body)
+	res.Body.Close()
+	if res.StatusCode > 299 {
+		log.Fatalf("Response failed with status code: %d and \nbody: %s\n", res.StatusCode, body)
+	}
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+	fmt.Printf("%s\n", body)
+	return nil
 }
 
 func main() {
