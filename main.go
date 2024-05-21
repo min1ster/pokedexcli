@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -15,20 +16,19 @@ type cliCommand struct {
 	callback    func() error
 }
 
-// type locationsPayload struct {
-// 	count int
-// 	next *string
-// 	previous *string
-// 	results []location
-// }
-
-// type location struct {
-// 	name string
-// 	url string
-// }
+type locationsPayload struct {
+	Count    int     `json:"count"`
+	Next     string  `json:"next"`
+	Previous *string `json:"previous"`
+	Results  []struct {
+		Name string `json:"name"`
+		Url  string `json:"url"`
+	} `json:"results"`
+}
 
 func getCommands() map[string]cliCommand {
 	commands := make(map[string]cliCommand)
+	currentPage := -1
 
 	helpCommand := cliCommand{
 		name:        "help",
@@ -56,9 +56,20 @@ func getCommands() map[string]cliCommand {
 		name:        "map",
 		description: "Displays the names of 20 location areas in the Pokemon world. Each call displays the next 20 locations.",
 		callback: func() error {
-			currentPage := 0
-			err := getLocations(currentPage)
 			currentPage += 1
+			err := getLocations(currentPage)
+			return err
+		},
+	}
+
+	mapBCommand := cliCommand{
+		name:        "mapb",
+		description: "Displays the previous 20 location areas in the Pokemon world. Each call displays the previous 20 locations.",
+		callback: func() error {
+			if currentPage > -1 {
+				currentPage -= 1
+			}
+			err := getLocations(currentPage)
 			return err
 		},
 	}
@@ -66,6 +77,7 @@ func getCommands() map[string]cliCommand {
 	commands["help"] = helpCommand
 	commands["exit"] = exitCommand
 	commands["map"] = mapCommand
+	commands["mapb"] = mapBCommand
 
 	return commands
 }
@@ -74,20 +86,27 @@ func getLocations(page int) error {
 	offset := 20 * page
 	endpoint := fmt.Sprintf("https://pokeapi.co/api/v2/location-area?offset=%d&limit=20", offset)
 	res, err := http.Get(endpoint)
+
 	if err != nil {
 		log.Fatal(err)
 		return err
 	}
-	body, err := io.ReadAll(res.Body)
-	res.Body.Close()
-	if res.StatusCode > 299 {
-		log.Fatalf("Response failed with status code: %d and \nbody: %s\n", res.StatusCode, body)
+
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		log.Fatalf("Response failed with status code: %d", res.StatusCode)
 	}
+
+	bodyBytes, err := io.ReadAll(res.Body)
 	if err != nil {
 		log.Fatal(err)
-		return err
 	}
-	fmt.Printf("%s\n", body)
+	locations := locationsPayload{}
+	json.Unmarshal(bodyBytes, &locations)
+	for _, location := range locations.Results {
+		fmt.Println(location.Name)
+	}
 	return nil
 }
 
