@@ -1,18 +1,18 @@
-package pokecache 
+package pokecache
 
 import (
-	"time"
 	"sync"
+	"time"
 )
 
 type Cache struct {
 	entries map[string]cacheEntry
-	mu sync.Mutex
+	mu      sync.Mutex
 }
 
 type cacheEntry struct {
 	createdAt time.Time
-	val []byte
+	val       []byte
 }
 
 func (c *Cache) Add(key string, val []byte) {
@@ -20,7 +20,7 @@ func (c *Cache) Add(key string, val []byte) {
 	defer c.mu.Unlock()
 	c.entries[key] = cacheEntry{
 		createdAt: time.Now(),
-		val: val,
+		val:       val,
 	}
 }
 

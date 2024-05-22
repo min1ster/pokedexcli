@@ -1,10 +1,10 @@
 package pokecache_test
 
 import (
-	"time"
-	"testing"
 	"fmt"
 	"github.com/min1ster/pokedexcli/pokecache"
+	"testing"
+	"time"
 )
 
 func TestAddGet(t *testing.T) {

@@ -1,11 +1,11 @@
 package locations
 
 import (
-	"fmt"
-	"net/http"
-	"log"
-	"io"
 	"encoding/json"
+	"fmt"
+	"io"
+	"log"
+	"net/http"
 )
 
 type locationsPayload struct {

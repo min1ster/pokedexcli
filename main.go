@@ -3,8 +3,8 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"os"
 	"github.com/min1ster/pokedexcli/locations"
+	"os"
 )
 
 type cliCommand struct {
@@ -68,8 +68,6 @@ func getCommands() map[string]cliCommand {
 
 	return commands
 }
-
-
 
 func main() {
 	commands := getCommands()
