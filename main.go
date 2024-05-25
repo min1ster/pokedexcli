@@ -6,8 +6,8 @@ import (
 	"github.com/min1ster/pokedexcli/locations"
 	"github.com/min1ster/pokedexcli/pokecache"
 	"os"
-	"time"
 	"strings"
+	"time"
 )
 
 type cliCommand struct {
@@ -67,7 +67,7 @@ func getCommands() map[string]cliCommand {
 	}
 
 	exploreCommand := cliCommand{
-		name: "explore",
+		name:        "explore",
 		description: "Displays the pokemon available at a given location.",
 		callback: func(location string) error {
 			err := locations.GetLocation(location, cache)
@@ -93,7 +93,7 @@ func main() {
 			input := scanner.Text()
 			args := strings.Fields(input)
 			commandName := args[0]
-			var commandArgument string 
+			var commandArgument string
 			if len(args) > 1 {
 				commandArgument = args[1]
 			}

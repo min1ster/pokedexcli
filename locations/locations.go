@@ -3,10 +3,10 @@ package locations
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/min1ster/pokedexcli/pokecache"
 	"io"
 	"log"
 	"net/http"
-	"github.com/min1ster/pokedexcli/pokecache"
 )
 
 type locationsPayload struct {
@@ -23,7 +23,7 @@ type locationPayload struct {
 	PokemonEncounters []struct {
 		Pokemon struct {
 			Name string `json:"name"`
-		}`json:"pokemon"`
+		} `json:"pokemon"`
 	} `json:"pokemon_encounters"`
 }
 
@@ -87,5 +87,3 @@ func handleLocationOutput(bodyBytes []byte) error {
 	}
 	return nil
 }
-
-
