@@ -82,8 +82,8 @@ func handleLocationOutput(bodyBytes []byte) error {
 	pokemon := locationPayload{}
 	json.Unmarshal(bodyBytes, &pokemon)
 	fmt.Println("Found Pokemon:")
-	for _, record := range pokemon.PokemonEncounters {
-		fmt.Printf(" - %s\n", record.Pokemon.Name)
+	for _, encounter := range pokemon.PokemonEncounters {
+		fmt.Printf(" - %s\n", encounter.Pokemon.Name)
 	}
 	return nil
 }
