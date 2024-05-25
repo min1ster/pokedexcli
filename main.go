@@ -4,7 +4,9 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/min1ster/pokedexcli/locations"
+	"github.com/min1ster/pokedexcli/pokecache"
 	"os"
+	"time"
 )
 
 type cliCommand struct {
@@ -14,6 +16,8 @@ type cliCommand struct {
 }
 
 func getCommands() map[string]cliCommand {
+	interval := time.Minute * 2
+	cache := pokecache.NewCache(interval)
 	commands := make(map[string]cliCommand)
 	currentPage := -1
 
@@ -44,7 +48,7 @@ func getCommands() map[string]cliCommand {
 		description: "Displays the names of 20 location areas in the Pokemon world. Each call displays the next 20 locations.",
 		callback: func() error {
 			currentPage += 1
-			err := locations.GetLocations(currentPage)
+			err := locations.GetLocations(currentPage, cache)
 			return err
 		},
 	}
@@ -56,7 +60,7 @@ func getCommands() map[string]cliCommand {
 			if currentPage > -1 {
 				currentPage -= 1
 			}
-			err := locations.GetLocations(currentPage)
+			err := locations.GetLocations(currentPage, cache)
 			return err
 		},
 	}
@@ -71,6 +75,7 @@ func getCommands() map[string]cliCommand {
 
 func main() {
 	commands := getCommands()
+
 	for {
 		fmt.Print("Pokedex > ")
 		scanner := bufio.NewScanner(os.Stdin)

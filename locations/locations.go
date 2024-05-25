@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"github.com/min1ster/pokedexcli/pokecache"
 )
 
 type locationsPayload struct {
@@ -18,9 +19,15 @@ type locationsPayload struct {
 	} `json:"results"`
 }
 
-func GetLocations(page int) error {
+func GetLocations(page int, cache *pokecache.Cache) error {
 	offset := 20 * page
 	endpoint := fmt.Sprintf("https://pokeapi.co/api/v2/location-area?offset=%d&limit=20", offset)
+	cacheEntry, ok := cache.Entries[endpoint]
+	if ok {
+		cache.Add(endpoint, cacheEntry.Val)
+		return handleOutput(cacheEntry.Val)
+	}
+
 	res, err := http.Get(endpoint)
 
 	if err != nil {
@@ -38,6 +45,11 @@ func GetLocations(page int) error {
 	if err != nil {
 		log.Fatal(err)
 	}
+	cache.Add(endpoint, bodyBytes)
+	return handleOutput(bodyBytes)
+}
+
+func handleOutput(bodyBytes []byte) error {
 	locations := locationsPayload{}
 	json.Unmarshal(bodyBytes, &locations)
 	for _, location := range locations.Results {
